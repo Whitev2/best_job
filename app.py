@@ -4,12 +4,15 @@ from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 
 from DataBase.TablesCreator import tables_god
+from handlers.users import start, menu, register
 from loader import all_data
+
 
 data = all_data()
 bot = data.get_bot()
 storage = RedisStorage.from_url(data.redis_url)
 dp = Dispatcher(storage)
+
 
 async def main():
     bot_info = await bot.get_me()
@@ -17,7 +20,9 @@ async def main():
 
     # Технические роутеры
 
-    #dp.include_router(pg_mg.router)
+    dp.include_router(start.router)
+    dp.include_router(menu.router)
+    dp.include_router(register.router)
     #dp.message.middleware(ThrottlingMiddleware())
 
     session = aiohttp.ClientSession()
