@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+
+  db:
+    image: postgres:12
+    container_name: best_postgres
+    env_file:
+      - .env
+    ports:
+      - "5431:5432"
+
+  redis:
+    image: redis
+    container_name: best_redis
+    ports:
+      - "2348:2342"
+    env_file:
+      - .env
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}" --save 20 1 --loglevel warning --port 2348
+
+  web:
+    build: .
+    container_name: best_job
+    command: bash -c 'python app.py'
+    volumes:
+      - .:/code
+    network_mode: host
+    depends_on:
+      - db
+    ports:
+      - "1440:1440"
+    env_file:
+      - .env
