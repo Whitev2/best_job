@@ -4,7 +4,7 @@ from aiogram import Bot
 from redis import from_url
 
 
-class all_data():
+class all_data:
     def __init__(self):
         self.redis_url = os.getenv('REDIS_URL')
         self.bot_token = os.getenv('BOT_TOKEN')
@@ -13,6 +13,7 @@ class all_data():
         self.pg_pswd = os.getenv('POSTGRES_PASSWORD')
         self.pg_host = os.getenv('POSTGRES_HOST')
         self.pg_port = os.getenv('POSTGRES_PORT')
+        self.driver_group = 123
         self.super_admins = (5441287748, 2133981686)
 
 # функции для подключения к базам и токен
