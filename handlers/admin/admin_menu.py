@@ -21,14 +21,14 @@ bot = data.get_bot()
 
 
 @router.message(F.text == 'Управление ботом')
-async def reset(message: Message, state: FSMContext):
+async def edit_bot(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Редактировать текст"))
     nmarkup.row(types.KeyboardButton(text="Назад"))
     await message.answer('Выберите интересующий вас пункт меню', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.message(F.text == 'Редактировать текст')
-async def reset(message: Message, state: FSMContext):
+async def edit_text(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Добавить текст"))
     nmarkup.row(types.KeyboardButton(text="Изменить текст"))
@@ -43,13 +43,23 @@ async def reset(message: Message, state: FSMContext):
 @router.message(F.text == 'Подтвердить', state=Admin_state.confirm_text)
 async def confirm(message: Message, state: FSMContext):
     data = await state.get_data()
-    state = await state.get_state()
-    print(state)
-    if state == 'Admin_state:confirm_text':
+    state_name = await state.get_state()
+    if state_name == 'Admin_state:confirm_text':
         tag = data['user_text'][0]
         text = data['user_text'][-1]
         await sql_safe_insert('texts', {'tag': tag, 'text': text})
         await message.answer('Текст успешно добавлен')
+        await state.set_state(Admin_state.main_menu)
+        await edit_text(message, state)
+
+
+@router.message(F.text == 'Отменить', state=Admin_state.confirm_text)
+async def confirm(message: Message, state: FSMContext):
+    state_name = await state.get_state()
+    if state_name == 'Admin_state:confirm_text':
+        await message.answer('Отмена операции')
+        await state.set_state(Admin_state.main_menu)
+        await edit_text(message, state)
 
 
 @router.message(F.text == 'Добавить текст')
