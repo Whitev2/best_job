@@ -11,6 +11,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from DataBase.base import sql_safe_insert
 from filters.admin_filter import IsAdmin
+from handlers.users.start import admin_menu
 from loader import all_data
 from states.admin_states import Admin_state
 
@@ -39,6 +40,10 @@ async def edit_text(message: Message, state: FSMContext):
 
 """********************************************* NEW TEXT **********************************************************"""
 
+@router.message(F.text == 'Выйти', state=Admin_state.confirm_text)
+async def confirm(message: Message, state: FSMContext):
+    await state.clear()
+    await admin_menu(message, state)
 
 @router.message(F.text == 'Подтвердить', state=Admin_state.confirm_text)
 async def confirm(message: Message, state: FSMContext):
