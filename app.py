@@ -4,6 +4,7 @@ from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 
 from DataBase.TablesCreator import tables_god
+from handlers.admin import admin_menu
 from handlers.users import start, menu, register
 from loader import all_data
 
@@ -21,6 +22,7 @@ async def main():
     # Технические роутеры
 
     dp.include_router(start.router)
+    dp.include_router(admin_menu.router)
     dp.include_router(menu.router)
     dp.include_router(register.router)
     #dp.message.middleware(ThrottlingMiddleware())

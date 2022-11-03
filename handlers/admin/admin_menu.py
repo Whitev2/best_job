@@ -9,6 +9,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
+from DataBase.base import sql_safe_insert
 from filters.admin_filter import IsAdmin
 from loader import all_data
 from states.admin_states import Admin_state
@@ -24,19 +25,31 @@ async def reset(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Редактировать текст"))
     nmarkup.row(types.KeyboardButton(text="Назад"))
-    await message.answer('Выберите интересующий вас пункт меню')
+    await message.answer('Выберите интересующий вас пункт меню', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(F.text == 'Управление ботом')
+@router.message(F.text == 'Редактировать текст')
 async def reset(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Добавить текст"))
     nmarkup.row(types.KeyboardButton(text="Изменить текст"))
     nmarkup.row(types.KeyboardButton(text="Удалить текст"))
     nmarkup.row(types.KeyboardButton(text="Выйти"))
-    await message.answer('Выберите интересующий вас пункт меню')
+    await message.answer('Выберите интересующий вас пункт меню', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 """********************************************* NEW TEXT **********************************************************"""
+
+
+@router.message(F.text == 'Подтвердить', state=Admin_state.confirm_text)
+async def confirm(message: Message, state: FSMContext):
+    data = await state.get_data()
+    state = await state.get_state()
+    print(state)
+    if state == 'Admin_state:confirm_text':
+        tag = data['user_text'][0]
+        text = data['user_text'][-1]
+        await sql_safe_insert('texts', {'tag': tag, 'text': text})
+        await message.answer('Текст успешно добавлен')
 
 
 @router.message(F.text == 'Добавить текст')
@@ -44,12 +57,12 @@ async def add_text(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Отменить"))
     await state.set_state(Admin_state.confirm_text)
-    await message.answer('Пожалуйста напишите текст в формате: TAG|TEXT\n\nДопускается HTML-разметка')
+    await message.answer('Пожалуйста напишите текст в формате: TAG|TEXT\n\nДопускается HTML-разметка', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
 @router.message(state=Admin_state.confirm_text)
 async def confirm_text(message: Message, state: FSMContext):
-    user_text = message.html_text.split()
+    user_text = message.html_text.split(sep='|')
     await state.update_data(user_text=user_text)
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Подтвердить"))
@@ -75,12 +88,3 @@ async def reset(message: Message, state: FSMContext):
 
 
 
-
-
-@router.message(F.text == 'Подтвердить')
-async def confirm(message: Message, state: FSMContext):
-    data = state.get_data()
-    state = state.get_state()
-
-    if state == 'Admin_state:confirm_text':
-        print('Добавить текст в базу')

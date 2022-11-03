@@ -32,6 +32,8 @@ def tables_god():
                      "id" INTEGER NOT NULL PRIMARY KEY,
                      "user_id" TEXT,
                      "DateTime_come" Date)''')
+        con.commit()
+        con.close()
 
     except psycopg2.Error as e:
         print(e)

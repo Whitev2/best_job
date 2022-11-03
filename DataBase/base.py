@@ -17,6 +17,9 @@ async def sql_delete(table_name, condition_dict):
 
         with con.cursor() as cur:
             cur.execute(safe_query, condition_dict)
+
+        con.commit()
+        con.close()
     except (psycopg2.Error, IndexError) as error:
         return False
 
@@ -42,6 +45,8 @@ async def sql_safe_select(column, table_name, condition_dict):
         with con.cursor() as cur:
             cur.execute(safe_query, condition_dict)
             data = cur.fetchall()
+        con.commit()
+        con.close()
         if isinstance(column, list):
             return data[0]
         else:
@@ -63,5 +68,7 @@ async def sql_safe_insert(table_name, values_dict: dict):
                                                                                                values_dict)))
         with con.cursor() as cur:
             cur.execute(safe_query, values_dict)
+        con.commit()
+        con.close()
     except (psycopg2.Error, IndexError) as error:
         return False
