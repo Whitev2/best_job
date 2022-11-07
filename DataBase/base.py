@@ -97,13 +97,84 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         print(error)
 
 
-async def data_getter(query):
+async def data_getter(query, record=None):
     try:
         data = all_data()
         con = data.get_postgres()
         with con.cursor() as cur:
-            cur.execute(query)
+            cur.execute(query, (record,))
             data = cur.fetchall()
         return data
     except psycopg2.Error as error:
         return error
+
+async def sql_count_rows():
+    try:
+        data = all_data()
+        con = data.get_postgres()
+        with con.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM orders")
+            data = cur.fetchall()
+        return data
+    except psycopg2.Error as error:
+        return error
+
+
+async def sql_get_last_rows(user_id: str, limit: str = 1):
+    try:
+        data = all_data()
+        con = data.get_postgres()
+        query = 'SELECT * FROM orders WHERE "Executor_id" = %s ORDER BY id DESC LIMIT %s'
+        record = (user_id, limit,)
+        print(record)
+        with con.cursor() as cur:
+            cur.execute(query, record)
+            data = cur.fetchall()
+        return data
+    except psycopg2.Error as error:
+        return error
+
+"""^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^DATA_REDIS^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+
+
+async def del_key(key):
+    try:
+        all_data().get_data_red().delete(key)
+    except Exception as error:
+        print(error)
+
+
+async def list_write(key, value):
+    try:
+        all_data().get_data_red().rpush(key, value)
+    except Exception as error:
+        print(error)
+
+
+async def list_read(key):
+    try:
+        return all_data().get_data_red().lrange(key, 0, -1)
+    except Exception as error:
+        print(error)
+
+
+async def redis_just_one_write(key, value, ttl: int = None):
+    try:
+        all_data().get_data_red().set(key, value, ex=ttl)
+    except Exception as error:
+        print(error)
+
+
+async def redis_just_one_read(key):
+    try:
+        return all_data().get_data_red().get(key)
+    except Exception as error:
+        print(error)
+
+
+async def redis_check(key):
+    try:
+        return all_data().get_data_red().exists(key)
+    except Exception as error:
+        print(error)
+

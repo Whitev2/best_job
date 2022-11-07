@@ -6,7 +6,7 @@ from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 from DataBase.TablesCreator import tables_god
 from Middleware.trottling import ThrottlingMiddleware
 from handlers.admin import admin_menu, orders
-from handlers.users import start, menu, register
+from handlers.users import start, menu, register, get_order
 from loader import all_data
 
 
@@ -26,6 +26,7 @@ async def main():
     dp.include_router(admin_menu.router)
     dp.include_router(menu.router)
     dp.include_router(register.router)
+    dp.include_router(get_order.router)
     dp.include_router(orders.router)
     dp.message.middleware(ThrottlingMiddleware())
     session = aiohttp.ClientSession()
