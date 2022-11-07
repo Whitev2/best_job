@@ -23,25 +23,48 @@ bot = data.get_bot()
 @router.message(F.text == 'Заказы')
 async def orders(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="2.5 ТОННЫ"))
-    nmarkup.row(types.KeyboardButton(text="5 ТОНН"))
-    nmarkup.row(types.KeyboardButton(text="10 ТОНН"))
+    nmarkup.row(types.KeyboardButton(text="Малая (2.5 ТОННЫ < И > 5 ТОНН)"))
+    nmarkup.row(types.KeyboardButton(text="Средняя (5 ТОНН)"))
+    nmarkup.row(types.KeyboardButton(text="Большая (10 ТОНН)"))
     nmarkup.row(types.KeyboardButton(text="Возврат в меню"))
     await message.answer('Пожалуйста, выберите грузоподъёмность автомобиля', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.message(F.text == 'Малая (2.5 ТОННЫ)')
 async def orders(message: Message, state: FSMContext):
-    nmarkup = ReplyKeyboardBuilder()
-    request = await data_getter("SELECT * WHERE car_mass == 5Т")
-    print(request)
-    await message.answer('Пожалуйста, выберите доступного водителя', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    request = await data_getter("SELECT * FROM users WHERE car_mass = '2.5Т'")
+    await message.answer('Пожалуйста, выберите доступного водителя')
+    if len(request) > 0:
+        for driver in request:
+            nmarkup = InlineKeyboardBuilder()
+            nmarkup.button(text='Создать заказ', callback_data=f'{driver[0]}|new_order')
+            print(driver)
+            await message.answer(f'Водитель: {driver[1]}\nНомер автомобиля: {driver[-2]}', reply_markup=nmarkup.as_markup())
+    else:
+        await message.answer('Увы, водителей нет')
 
 @router.message(F.text == 'Средняя (5 ТОНН)')
 async def orders(message: Message, state: FSMContext):
-    nmarkup = ReplyKeyboardBuilder()
-    await message.answer('Пожалуйста, выберите доступного водителя', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    request = await data_getter("SELECT * FROM users WHERE car_mass = '5Т'")
+    await message.answer('Пожалуйста, выберите доступного водителя')
+    if len(request) > 0:
+        for driver in request:
+            nmarkup = InlineKeyboardBuilder()
+            nmarkup.button(text='Создать заказ', callback_data=f'{driver[0]}|new_order')
+            print(driver)
+            await message.answer(f'Водитель: {driver[1]}\nНомер автомобиля: {driver[-2]}', reply_markup=nmarkup.as_markup())
+    else:
+        await message.answer('Увы, водителей нет')
+
 
 @router.message(F.text == 'Большая (10 ТОНН)')
 async def orders(message: Message, state: FSMContext):
-    nmarkup = ReplyKeyboardBuilder()
-    await message.answer('Пожалуйста, выберите доступного водителя', reply_markup=nmarkup.as_markup(resize_keyboard=True))
+    request = await data_getter("SELECT * FROM users WHERE car_mass = '10Т'")
+    await message.answer('Пожалуйста, выберите доступного водителя')
+    if len(request) > 0:
+        for driver in request:
+            nmarkup = InlineKeyboardBuilder()
+            nmarkup.button(text='Создать заказ', callback_data=f'{driver[0]}|new_order')
+            print(driver)
+            await message.answer(f'Водитель: {driver[1]}\nНомер автомобиля: {driver[-2]}', reply_markup=nmarkup.as_markup())
+    else:
+        await message.answer('Увы, водителей нет')
