@@ -23,7 +23,7 @@ bot = data.get_bot()
 @router.message(F.text == 'Заказы')
 async def orders(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
-    nmarkup.row(types.KeyboardButton(text="Малая (2.5 ТОННЫ < И > 5 ТОНН)"))
+    nmarkup.row(types.KeyboardButton(text="Малая (2.5 ТОННЫ)"))
     nmarkup.row(types.KeyboardButton(text="Средняя (5 ТОНН)"))
     nmarkup.row(types.KeyboardButton(text="Большая (10 ТОНН)"))
     nmarkup.row(types.KeyboardButton(text="Возврат в меню"))
