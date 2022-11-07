@@ -106,27 +106,26 @@ async def add_stop(query: types.CallbackQuery, state: FSMContext):
 
 @router.message(state=Order_state.address)
 async def address(message: types.Message, state: FSMContext):
-    await message.delete()
+    print(11)
     data = await state.get_data()
     last_count = data.get('count')
     message_id = data.get('message_id')
     user_id = data.get('user_id')
     router_message_id = data.get('router_message_id')
-    await bot.delete_message(chat_id=user_id, message_id=router_message_id)
-
+    await bot.delete_message(chat_id=message.from_user.id, message_id=router_message_id)
+    print(1)
     address = message.text
     nmarkup = InlineKeyboardBuilder()
     nmarkup.button(text='Добавить остановку', callback_data=f'add_stop')
     nmarkup.button(text='Создать заказ', callback_data=f'{user_id}|confirm_order')
-
+    print(2)
     text = data.get("text")
     text = text + "\n\n__________________\n" + f"Точка: {last_count}\n" + f"Адрес: {address}"
 
     await state.update_data(user_id=user_id)
     await state.update_data(text=text)
-
-    await bot.edit_message_text(text=text, chat_id=user_id, message_id=message_id, reply_markup=nmarkup.as_markup())
-    await list_write(f"{user_id}: Orders: ", address)
+    await bot.edit_message_text(text=text, chat_id=message.from_user.id, message_id=message_id, reply_markup=nmarkup.as_markup())
+    await list_write(f"Orders: {user_id}: ", address)
     await state.set_state(Order_state.add_stop)
 
 

@@ -125,6 +125,13 @@ async def list_write(key, value):
         print(error)
 
 
+async def list_read(key):
+    try:
+        return all_data().get_data_red().lrange(key, 0, -1)
+    except Exception as error:
+        print(error)
+
+
 async def redis_just_one_write(key, value, ttl: int = None):
     try:
         all_data().get_data_red().set(key, value, ex=ttl)

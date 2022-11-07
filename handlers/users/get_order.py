@@ -3,9 +3,10 @@ import asyncio
 from aiogram import Router, F
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, order_info
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
+from DataBase.base import list_read, redis_just_one_write
 from filters.driver_filter import IsDriver
 from loader import all_data
 from states.driver_register import driver_reg
@@ -29,6 +30,10 @@ async def send_order(user_id, text):
 
 @router.callback_query(lambda call: 'driver_confirm_order' in call.data)
 async def driver_confirm_order(query: types.CallbackQuery, state: FSMContext):
+    await redis_just_one_write("User: Status_delivery:", "1")
+    user_id = query.from_user.id
+    order_info = await list_read(f"Orders: {user_id}: ")
+    print(order_info)
     await query.message.answer('Вы подтвердили заказ')
 
 @router.callback_query(lambda call: 'driver_cancel_order' in call.data)
