@@ -107,3 +107,41 @@ async def data_getter(query):
         return data
     except psycopg2.Error as error:
         return error
+
+"""^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^DATA_REDIS^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
+
+
+async def del_key(key):
+    try:
+        all_data().get_data_red().delete(key)
+    except Exception as error:
+        print(error)
+
+
+async def list_write(key, value):
+    try:
+        all_data().get_data_red().rpush(key, value)
+    except Exception as error:
+        print(error)
+
+
+async def redis_just_one_write(key, value, ttl: int = None):
+    try:
+        all_data().get_data_red().set(key, value, ex=ttl)
+    except Exception as error:
+        print(error)
+
+
+async def redis_just_one_read(key):
+    try:
+        return all_data().get_data_red().get(key)
+    except Exception as error:
+        print(error)
+
+
+async def redis_check(key):
+    try:
+        return all_data().get_data_red().exists(key)
+    except Exception as error:
+        print(error)
+
