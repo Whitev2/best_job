@@ -108,6 +108,17 @@ async def data_getter(query):
     except psycopg2.Error as error:
         return error
 
+async def sql_count_rows():
+    try:
+        data = all_data()
+        con = data.get_postgres()
+        with con.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM orders")
+            data = cur.fetchall()
+        return data
+    except psycopg2.Error as error:
+        return error
+
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^DATA_REDIS^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 
 

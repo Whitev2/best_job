@@ -33,8 +33,8 @@ def tables_god():
 
         cur.execute('''CREATE TABLE IF NOT EXISTS public.orders(
                      "id" INTEGER NOT NULL PRIMARY KEY,
-                     "user_id" TEXT,
-                     "DateTime_order" Date,
+                     "Executor_id" TEXT,
+                     "DateTime_order" TEXT,
                      "extradition" json
                      )''')
         con.commit()
