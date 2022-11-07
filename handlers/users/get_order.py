@@ -31,3 +31,7 @@ async def send_order(user_id, text):
 async def driver_confirm_order(query: types.CallbackQuery, state: FSMContext):
     await query.message.answer('Вы подтвердили заказ')
 
+@router.callback_query(lambda call: 'driver_cancel_order' in call.data)
+async def driver_cancel_order(query: types.CallbackQuery, state: FSMContext):
+    await query.message.answer('Вы отказылись от заказа')
+
