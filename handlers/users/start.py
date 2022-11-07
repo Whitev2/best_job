@@ -4,16 +4,34 @@ from aiogram import Router
 from aiogram import types
 from aiogram.dispatcher.fsm.context import FSMContext
 
+from DataBase.base import sql_safe_select
+from filters.admin_filter import IsAdmin
 from filters.driver_filter import IsDriver
+from handlers.users.menu import user_cabinet
+from keyboard.admin_kb import main_admin_keyboard
+from states.admin_states import Admin_state
+from states.driver_register import driver_reg
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message(IsDriver())
+router.message(state="*")
+@router.message(IsAdmin(), commands=['admin'], state="*")
+async def admin_menu(message: types.Message, state: FSMContext):
+    await state.clear()
+    print(1)
+    await state.set_state(Admin_state.main_menu)
+    await message.answer('Добро пожадовать в админ меню.', reply_markup=main_admin_keyboard())
 
 @router.message(IsDriver(), commands=['start'], flags=flags)
 async def admin_menu(message: types.Message, state: FSMContext):
-    await message.answer('Добро пожадовать, пожалуйста, напишите номер своего автомобиля.')
-@router.message(commands=['admin'], flags=flags)
-async def admin_menu(message: types.Message, state: FSMContext):
-    await message.answer('Добро пожадовать в админ меню.')
+    user_info = await sql_safe_select('username', 'users', {'user_id': str(message.from_user.id)})
+    if not user_info:
+        print(user_info)
+        await state.set_state(driver_reg.name)
+        await message.answer('Добро пожадовать, пожалуйста, напишите ваше ФИО.')
+    else:
+        await user_cabinet(message, state)
+
+
+
 
