@@ -35,7 +35,8 @@ def tables_god():
                      "id" INTEGER NOT NULL PRIMARY KEY,
                      "Executor_id" TEXT,
                      "DateTime_order" TEXT,
-                     "extradition" json
+                     "extradition" json,
+                     "status" BOOL
                      )''')
         con.commit()
         con.close()

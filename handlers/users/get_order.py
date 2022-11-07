@@ -8,7 +8,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, order_info
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from DataBase.base import list_read, redis_just_one_write, sql_safe_insert, sql_count_rows
+from DataBase.base import list_read, redis_just_one_write, sql_safe_insert, sql_count_rows, sql_safe_select, \
+    data_getter, sql_get_last_rows
 from filters.driver_filter import IsDriver
 from loader import all_data
 from states.driver_register import driver_reg
@@ -39,8 +40,10 @@ async def driver_confirm_order(query: types.CallbackQuery, state: FSMContext):
     count_rows = count_rows[0][0]
     jsonorder = json.dumps(order_info)
     await sql_safe_insert('orders', {"id": count_rows + 1, "Executor_id": query.from_user.id,
-                                     "DateTime_order": datetime.utcnow(), "extradition": jsonorder})
-    await query.message.answer('Вы подтвердили заказ    ')
+                                     "DateTime_order": datetime.utcnow(), "extradition": jsonorder, "status": False})
+    r = await sql_get_last_rows(str(user_id))
+    print(r)
+    await query.message.answer('Вы подтвердили заказ')
 
 @router.callback_query(lambda call: 'driver_cancel_order' in call.data)
 async def driver_cancel_order(query: types.CallbackQuery, state: FSMContext):

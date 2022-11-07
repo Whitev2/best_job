@@ -97,12 +97,12 @@ async def sql_safe_update(table_name, data_dict, condition_dict):
         print(error)
 
 
-async def data_getter(query):
+async def data_getter(query, record=None):
     try:
         data = all_data()
         con = data.get_postgres()
         with con.cursor() as cur:
-            cur.execute(query)
+            cur.execute(query, (record,))
             data = cur.fetchall()
         return data
     except psycopg2.Error as error:
@@ -114,6 +114,21 @@ async def sql_count_rows():
         con = data.get_postgres()
         with con.cursor() as cur:
             cur.execute("SELECT COUNT(*) FROM orders")
+            data = cur.fetchall()
+        return data
+    except psycopg2.Error as error:
+        return error
+
+
+async def sql_get_last_rows(user_id: str, limit: str = 1):
+    try:
+        data = all_data()
+        con = data.get_postgres()
+        query = 'SELECT * FROM orders WHERE "Executor_id" = %s ORDER BY id DESC LIMIT %s'
+        record = (user_id, limit,)
+        print(record)
+        with con.cursor() as cur:
+            cur.execute(query, record)
             data = cur.fetchall()
         return data
     except psycopg2.Error as error:
