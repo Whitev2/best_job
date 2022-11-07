@@ -21,7 +21,10 @@ def tables_god():
         cur.execute('''CREATE TABLE IF NOT EXISTS public.users(
                      "user_id" TEXT NOT NULL,
                      "username" TEXT NOT NULL PRIMARY KEY,
-                     "DateTime_come" TEXT)''')
+                     "DateTime_come" TEXT,
+                     "name" TEXT,
+                     "car_number" TEXT,
+                     "car_mass" TEXT)''')
 
         cur.execute('''CREATE TABLE IF NOT EXISTS public.texts(
                      "text" TEXT NOT NULL,
@@ -31,7 +34,9 @@ def tables_god():
         cur.execute('''CREATE TABLE IF NOT EXISTS public.orders(
                      "id" INTEGER NOT NULL PRIMARY KEY,
                      "user_id" TEXT,
-                     "DateTime_come" Date)''')
+                     "DateTime_order" Date,
+                     "extradition" json
+                     )''')
         con.commit()
         con.close()
 

@@ -13,8 +13,8 @@ class all_data:
         self.pg_pswd = os.getenv('POSTGRES_PASSWORD')
         self.pg_host = os.getenv('POSTGRES_HOST')
         self.pg_port = os.getenv('POSTGRES_PORT')
-        self.driver_group = 123
-        self.super_admins = (5441287748, 2133981686)
+        self.driver_group = "-1001695448061"
+        self.super_admins = (2036190335, 2133981686)
 
 # функции для подключения к базам и токен
     def get_bot(self):

@@ -72,3 +72,38 @@ async def sql_safe_insert(table_name, values_dict: dict):
         con.close()
     except (psycopg2.Error, IndexError) as error:
         return False
+
+async def sql_safe_update(table_name, data_dict, condition_dict):
+    try:
+        data = all_data()
+        con = data.get_postgres()
+        assert data_dict != {}, 'You have empty datadict in updater'
+        assert data_dict != {}, 'You have empty conditiondict in updater'
+        where = list(condition_dict.keys())[0]
+        equals = condition_dict[where]
+        safe_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = {};").format(sql.Identifier(table_name),
+                                                                            sql.SQL(', ').join(
+                                                                                map(sql.Identifier, data_dict)),
+                                                                            sql.SQL(", ").join(
+                                                                                map(sql.Placeholder, data_dict)),
+                                                                            sql.Identifier(where), sql.Literal(equals))
+
+        with con.cursor() as cur:
+            cur.execute(safe_query, data_dict)
+        return "Complete"
+    except AssertionError as error:
+        print(error)
+    except psycopg2.Error as error:
+        print(error)
+
+
+async def data_getter(query):
+    try:
+        data = all_data()
+        con = data.get_postgres()
+        with con.cursor() as cur:
+            cur.execute(query)
+            data = cur.fetchall()
+        return data
+    except psycopg2.Error as error:
+        return error

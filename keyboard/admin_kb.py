@@ -4,6 +4,7 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 def main_admin_keyboard():
     nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Заказы"))
     nmarkup.row(types.KeyboardButton(text="Аналитика"))
     nmarkup.row(types.KeyboardButton(text="Управление ботом"))
 
