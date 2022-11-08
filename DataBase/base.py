@@ -120,7 +120,7 @@ async def sql_count_rows():
         return error
 
 
-async def sql_get_last_rows(user_id: str, limit: str = 1):
+async def sql_get_last_rows(user_id: str, limit: int = 1):
     try:
         data = all_data()
         con = data.get_postgres()

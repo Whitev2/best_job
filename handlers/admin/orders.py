@@ -100,34 +100,40 @@ async def add_stop(query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     last_count = data.get('count')
     await state.update_data(count=int(last_count) + 1)
-    router_message = await query.message.answer("Пожалуйста, введите адрес точки разгрузки")
+    router_message = await query.message.answer("Пожалуйста, введите адрес точки разгрузки,"
+                                                " колличество коробок и артикуль\n\n"
+                                                "<b>Формат вводимых данных:</b>\n"
+                                                "Г. Москва, ул. Большая серпуховская 32//ЧИСЛО_КОРОБОК//АРТИКУЛь"
+                                                '\n\n❕ Используйте "//" для разделения текста')
     await state.update_data(router_message_id=router_message.message_id)
 
 
 @router.message(state=Order_state.address)
 async def address(message: types.Message, state: FSMContext):
-    print(11)
-    data = await state.get_data()
-    last_count = data.get('count')
-    message_id = data.get('message_id')
-    user_id = data.get('user_id')
-    router_message_id = data.get('router_message_id')
-    await bot.delete_message(chat_id=message.from_user.id, message_id=router_message_id)
-    print(1)
-    address = message.text
-    nmarkup = InlineKeyboardBuilder()
-    nmarkup.button(text='Добавить остановку', callback_data=f'add_stop')
-    nmarkup.button(text='Создать заказ', callback_data=f'{user_id}|confirm_order')
-    print(2)
-    text = data.get("text")
-    text = text + "\n\n__________________\n" + f"Точка: {last_count}\n" + f"Адрес: {address}"
+    address = message.html_text.split("//")
+    if len(address) == 3:
+        data = await state.get_data()
+        last_count = data.get('count')
+        message_id = data.get('message_id')
+        user_id = data.get('user_id')
+        router_message_id = data.get('router_message_id')
+        await bot.delete_message(chat_id=message.from_user.id, message_id=router_message_id)
+        nmarkup = InlineKeyboardBuilder()
+        nmarkup.button(text='Добавить остановку', callback_data=f'add_stop')
+        nmarkup.button(text='Создать заказ', callback_data=f'{user_id}|confirm_order')
+        text = data.get("text")
+        text = text + "\n\n__________________\n" + f"Точка: {last_count}\n" + f"Адрес: {address[0]}\n" \
+                                                                              f"Кол-во коробок: {address[1]}\n" \
+                                                                              f"Артикуль: {address[2]}"
 
-    await state.update_data(user_id=user_id)
-    await state.update_data(text=text)
-    await bot.edit_message_text(text=text, chat_id=message.from_user.id, message_id=message_id, reply_markup=nmarkup.as_markup())
-    await list_write(f"Orders: {user_id}: ", address)
-    await state.set_state(Order_state.add_stop)
-
+        await state.update_data(user_id=user_id)
+        await state.update_data(text=text)
+        await bot.edit_message_text(text=text, chat_id=message.from_user.id, message_id=message_id, reply_markup=nmarkup.as_markup())
+        await list_write(f"Orders: {user_id}: ", message.html_text)
+        await state.set_state(Order_state.add_stop)
+    else:
+        await message.answer('Проверьте введеные данные и повторите попытку'
+                             '\n\n❕ Используйте "//" для разделения текста')
 
 @router.callback_query(lambda call: 'confirm_order' in call.data, state=Order_state.add_stop)
 async def add_stop(query: types.CallbackQuery, state: FSMContext):
