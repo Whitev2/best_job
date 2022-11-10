@@ -6,3 +6,6 @@ class Order_state(StatesGroup):
     add_stop = State()
     address = State()
     send_order = State
+
+class Order_driver(StatesGroup):
+    driver_here = State()

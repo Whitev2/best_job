@@ -7,7 +7,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from DataBase.base import sql_safe_insert, sql_safe_update
+from DataBase.base import sql_safe_insert
 from filters.driver_filter import IsDriver
 from states.driver_menu import Driver_menu
 from states.driver_register import driver_reg

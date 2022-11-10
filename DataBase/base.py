@@ -73,28 +73,23 @@ async def sql_safe_insert(table_name, values_dict: dict):
     except (psycopg2.Error, IndexError) as error:
         return False
 
-async def sql_safe_update(table_name, data_dict, condition_dict):
+
+async def sql_update(column, user_id, condition_dict):
     try:
         data = all_data()
         con = data.get_postgres()
-        assert data_dict != {}, 'You have empty datadict in updater'
-        assert data_dict != {}, 'You have empty conditiondict in updater'
         where = list(condition_dict.keys())[0]
         equals = condition_dict[where]
-        safe_query = sql.SQL("UPDATE {} SET {} = {} WHERE {} = {};").format(sql.Identifier(table_name),
-                                                                            sql.SQL(', ').join(
-                                                                                map(sql.Identifier, data_dict)),
-                                                                            sql.SQL(", ").join(
-                                                                                map(sql.Placeholder, data_dict)),
-                                                                            sql.Identifier(where), sql.Literal(equals))
 
+        last_row = await sql_get_last_order_id(user_id)
+        id = last_row[0][0]
+        query = "UPDATE {} SET {} = {}  WHERE {} = {};".format(f'"{column}"', f'"{where}"', f"'{equals}'", f'"id"', id)
         with con.cursor() as cur:
-            cur.execute(safe_query, data_dict)
-        return "Complete"
-    except AssertionError as error:
-        print(error)
+            cur.execute(query)
+            con.commit()
+            con.close()
     except psycopg2.Error as error:
-        print(error)
+        return error
 
 
 async def data_getter(query, record=None):
@@ -133,6 +128,20 @@ async def sql_get_last_rows(user_id: str, limit: int = 1):
         return data
     except psycopg2.Error as error:
         return error
+
+async def sql_get_last_order_id(user_id: str):
+    try:
+        data = all_data()
+        con = data.get_postgres()
+        query = 'SELECT id FROM orders WHERE "Executor_id" = %s ORDER BY id DESC LIMIT %s'
+        record = (user_id, 1,)
+        with con.cursor() as cur:
+            cur.execute(query, record)
+            data = cur.fetchall()
+        return data
+    except psycopg2.Error as error:
+        return error
+
 
 """^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^DATA_REDIS^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"""
 

@@ -33,7 +33,7 @@ async def orders_history(message: Message, state: FSMContext):
     text = f"Последние {len(last_orders)} заказов:\n\n"
     for order in last_orders:
         datestr = order[1]
-        cuont_stop = len(order[2])
+        cuont_stop = len(order[3])
         order_date = datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S.%f")
         text = text + f"Дата заказа: {str(order_date)[:-10]}\nКоличество остановок: {cuont_stop}\n_______________\n"
     await message.answer(text)

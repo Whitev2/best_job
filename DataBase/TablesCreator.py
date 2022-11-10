@@ -30,9 +30,11 @@ def tables_god():
         cur.execute('''CREATE TABLE IF NOT EXISTS public.orders(
                      "id" INTEGER NOT NULL PRIMARY KEY,
                      "DateTime_order" TEXT,
+                     "order_time" TEXT,
                      "extradition" json,
                      "status" BOOL,
                      "Executor_id" TEXT,
+                     "price" FLOAT,
                      FOREIGN KEY ("Executor_id")  REFERENCES users (user_id)
                      )''')
         con.commit()
