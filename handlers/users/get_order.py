@@ -8,8 +8,8 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, order_info
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from DataBase.base import list_read, redis_just_one_write, sql_safe_insert, sql_count_rows, sql_safe_select, \
-    data_getter, sql_get_last_rows, del_key, sql_update
+from DataBase.base import list_read, redis_just_one_write, \
+    data_getter, del_key, Order, User
 from filters.driver_filter import IsDriver
 from handlers.users.menu import user_cabinet
 from loader import all_data
@@ -24,6 +24,8 @@ router.message(IsDriver())
 data = all_data()
 bot = data.get_bot()
 
+order = Order()
+user = User()
 
 async def send_order(user_id, text):
     try:
@@ -43,13 +45,13 @@ async def driver_confirm_order(query: types.CallbackQuery, state: FSMContext):
     await redis_just_one_write("User: Status_delivery:", "1")
     user_id = query.from_user.id
     order_info = await list_read(f"Orders: {user_id}: ")
-    count_rows = await sql_count_rows()
+    count_rows = await order.get_last_order(str(query.from_user.id))
     count_rows = count_rows[0][0]
     jsonorder = json.dumps(order_info)
-    await sql_safe_insert('orders', {"id": count_rows + 1, "Executor_id": str(query.from_user.id),
+
+    await user.sql_safe_insert('orders', {"id": count_rows + 1, "Executor_id": str(query.from_user.id),
                                      "DateTime_order": datetime.utcnow(), "extradition": jsonorder, "status": False,
                                      "order_time": None, 'price': 0.0})
-    r = await sql_get_last_rows(str(user_id))
     await del_key(f"Orders: {user_id}: ")
     nmarkup = ReplyKeyboardBuilder()
     nmarkup.row(types.KeyboardButton(text="Я приехал"))
@@ -67,7 +69,7 @@ async def driver_here(message: Message, state: FSMContext):
     data = await state.get_data()
     count = data.get("count")
 
-    driver_order = await sql_get_last_rows(str(message.from_user.id))
+    driver_order = await order.get_last_order(str(message.from_user.id))
     time_start = driver_order[0][1]
     time_start = datetime.strptime(time_start, "%Y-%m-%d %H:%M:%S.%f")
     print(driver_order)
@@ -78,8 +80,8 @@ async def driver_here(message: Message, state: FSMContext):
     else:
         order_price = await salary(len(driver_order[0][3]))
         date_end = datetime.now() - time_start
-        await sql_update('orders', str(message.from_user.id), {'order_time': f'{date_end}'})
-        await sql_update('orders', str(message.from_user.id), {'price': f'{order_price}'})
+        await order.sql_update_orders('orders', str(message.from_user.id), {'order_time': f'{date_end}'})
+        await order.sql_update_orders('orders', str(message.from_user.id), {'price': f'{order_price}'})
         await message.answer("Маршрут завершен, оплату за заказ вы можете посмотреть в своём кабинете.")
         await state.set_state(driver_reg.main)
         await user_cabinet(message, state)

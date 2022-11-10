@@ -18,8 +18,8 @@ def tables_god():
                      "user_id" TEXT NOT NULL PRIMARY KEY,
                      "username" TEXT NOT NULL,
                      "DateTime_come" TEXT,
-                     "name" TEXT,
                      "car_number" TEXT,
+                     "balance" FLOAT,
                      "car_mass" TEXT)''')
 
         cur.execute('''CREATE TABLE IF NOT EXISTS public.texts(

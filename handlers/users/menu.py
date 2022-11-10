@@ -7,7 +7,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from DataBase.base import sql_get_last_rows
+from DataBase.base import Order
 from filters.driver_filter import IsDriver
 from states.driver_register import driver_reg
 
@@ -15,7 +15,7 @@ flags = {"throttling_key": "True"}
 router = Router()
 router.message(IsDriver())
 router.message(state=driver_reg)
-
+order = Order()
 
 @router.message(F.text == 'Мой кабинет')
 async def user_cabinet(message: Message, state: FSMContext):
@@ -28,12 +28,12 @@ async def user_cabinet(message: Message, state: FSMContext):
 
 @router.message(F.text == 'История заказов')
 async def orders_history(message: Message, state: FSMContext):
-    last_orders = await sql_get_last_rows(user_id=str(message.from_user.id), limit=10)
+    last_orders = await order.get_last_order(user_id=str(message.from_user.id), limit=10)
     print(last_orders)
     text = f"Последние {len(last_orders)} заказов:\n\n"
-    for order in last_orders:
-        datestr = order[1]
-        cuont_stop = len(order[3])
+    for orders in last_orders:
+        datestr = orders[1]
+        cuont_stop = len(orders[3])
         order_date = datetime.strptime(datestr, "%Y-%m-%d %H:%M:%S.%f")
         text = text + f"Дата заказа: {str(order_date)[:-10]}\nКоличество остановок: {cuont_stop}\n_______________\n"
     await message.answer(text)
