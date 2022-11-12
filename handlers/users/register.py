@@ -7,7 +7,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from DataBase.base import User
+from DataBase.base import User, sql_safe_insert
 from filters.driver_filter import IsDriver
 from states.driver_menu import Driver_menu
 from states.driver_register import driver_reg
@@ -41,8 +41,10 @@ async def name(message: Message, state: FSMContext):
     if message.text in ['2.5Т', '5Т', '10Т']:
         data = await state.get_data()
         car_mass = message.text
-        await user.sql_safe_insert('users', {'user_id': message.from_user.id, 'username': data['name'],
-                                        'DateTime_come': datetime.now(), 'car_number': data['number_car'],
+        print(data)
+        print(car_mass)
+        await sql_safe_insert('users', {'user_id': message.from_user.id, 'username': data['name'],
+                                        'DateTime_come': datetime.now(), 'balance': float(0), 'car_number': data['number_car'],
                                         'car_mass': car_mass[:-1]})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Мой кабинет"))

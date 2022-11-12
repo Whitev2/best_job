@@ -21,7 +21,7 @@ async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
     user = User()
-    print(await user.get_user_info('2036190335'))
+    print(await user.get_user_info('2036190335', 'balance'))
     # Технические роутеры
 
     dp.include_router(start.router)

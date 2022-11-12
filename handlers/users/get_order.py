@@ -9,7 +9,7 @@ from aiogram.types import Message, order_info
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 from DataBase.base import list_read, redis_just_one_write, \
-    data_getter, del_key, Order, User
+    data_getter, del_key, Order, User, sql_safe_insert
 from filters.driver_filter import IsDriver
 from handlers.users.menu import user_cabinet
 from loader import all_data
@@ -42,14 +42,18 @@ async def driver_confirm_order(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Order_driver.driver_here)
     await state.update_data(count=0)
     await query.message.delete()
-    await redis_just_one_write("User: Status_delivery:", "1")
+    await redis_just_one_write(f"User: Status_delivery: {query.from_user.id}", "1")
     user_id = query.from_user.id
     order_info = await list_read(f"Orders: {user_id}: ")
-    count_rows = await order.get_last_order(str(query.from_user.id))
-    count_rows = count_rows[0][0]
+    count_rows = await order.get_last_order(f"{query.from_user.id}")
+    print(count_rows)
+    if len(count_rows) != 0:
+        count_rows = count_rows[0][0]
+    else:
+        count_rows = 0
     jsonorder = json.dumps(order_info)
 
-    await user.sql_safe_insert('orders', {"id": count_rows + 1, "Executor_id": str(query.from_user.id),
+    await sql_safe_insert('orders', {"id": count_rows + 1, "Executor_id": str(query.from_user.id),
                                      "DateTime_order": datetime.utcnow(), "extradition": jsonorder, "status": False,
                                      "order_time": None, 'price': 0.0})
     await del_key(f"Orders: {user_id}: ")
@@ -78,8 +82,14 @@ async def driver_here(message: Message, state: FSMContext):
         await message.answer(f"Отлично! Ваш следующий адрес: {address}")
         await state.update_data(count=count + 1)
     else:
+        user_balance = await user.get_balance(message.from_user.id)
+        await redis_just_one_write(f"User: Status_delivery: {message.from_user.id}", "0")
         order_price = await salary(len(driver_order[0][3]))
+        print(user_balance)
+        print(order_price)
+        new_user_balance = float(user_balance) + float(order_price)
         date_end = datetime.now() - time_start
+        await user.sql_update('users', {'balance': new_user_balance}, {'user_id': message.from_user.id})
         await order.sql_update_orders('orders', str(message.from_user.id), {'order_time': f'{date_end}'})
         await order.sql_update_orders('orders', str(message.from_user.id), {'price': f'{order_price}'})
         await message.answer("Маршрут завершен, оплату за заказ вы можете посмотреть в своём кабинете.")

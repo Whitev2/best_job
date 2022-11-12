@@ -13,27 +13,14 @@ class User:
         self.data = all_data()
 
 
-    async def get_user_info(self, user_id):
+    async def get_user_info(self, user_id, column):
         con = self.data.get_postgres()
-        sql_query = "SELECT * FROM users WHERE user_id = {}".format(f"'{user_id}'")
+        sql_query = "SELECT {} FROM users WHERE user_id = {}".format(column, f"'{user_id}'")
         with con.cursor() as cur:
             cur.execute(sql_query)
             data = cur.fetchall()
             return data
 
-    async def sql_safe_insert(self, table_name, values_dict: dict):
-        try:
-            con = self.data.get_postgres()
-            safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name),
-                                                                            sql.SQL(', ').join(map(sql.Identifier,
-                                                                                                   values_dict)),
-                                                                            sql.SQL(", ").join(map(sql.Placeholder,
-                                                                                                   values_dict)))
-            with con.cursor() as cur:
-                cur.execute(safe_query, values_dict)
-            con.commit()
-        except (psycopg2.Error, IndexError) as error:
-            return False
 
     async def sql_delete(self, table_name, condition_dict):
         try:
@@ -48,14 +35,14 @@ class User:
         except (psycopg2.Error, IndexError) as error:
             return False
 
-    async def sql_update(self, column, update_dict, condition_dict):
+    async def sql_update(self, table, update_dict, condition_dict):
         try:
             con = self.data.get_postgres()
             set_poin = list(update_dict.keys())[0]
             equals = update_dict[set_poin]
             where = list(condition_dict.keys())[0]
             point = condition_dict[where]
-            query = "UPDATE {} SET {} = {}  WHERE {} = {};".format(f'"{column}"', f'"{set_poin}"', f"'{equals}'",
+            query = "UPDATE {} SET {} = {}  WHERE {} = {};".format(f'"{table}"', f'"{set_poin}"', f"'{equals}'",
                                                                    f'"{where}"', f"'{point}'")
             with con.cursor() as cur:
                 cur.execute(query)
@@ -64,35 +51,36 @@ class User:
             return error
 
     async def get_username(self, user_id):
-        data = await self.get_user_info(user_id)
-        print(data)
+        data = await self.get_user_info(user_id, 'username')
+        return data[0][0]
 
     async def get_car_number(self, user_id):
-        data = await self.get_user_info(user_id)
-        print(data)
+        data = await self.get_user_info(user_id, 'car_number')
+        return data[0][0]
     async def get_car_mass(self, user_id):
-        data = await self.get_user_info(user_id)
-        print(data)
+        data = await self.get_user_info(user_id, 'car_mass')
+        return data[0][0]
 
     async def get_balance(self, user_id):
-        data = await self.get_user_info(user_id)
-        print(data)
+        data = await self.get_user_info(user_id, "balance")
+        return data[0][0]
 
 
 
-class Order(User):
+class Order():
     def __init__(self):
-        super().__init__()
+        self.data = all_data()
 
     async def get_last_order(self, user_id: str, limit: int = 1):
         try:
             con = self.data.get_postgres()
             query = 'SELECT * FROM orders WHERE "Executor_id" = %s ORDER BY id DESC LIMIT %s'
             record = (user_id, limit,)
-            print(record)
+
             with con.cursor() as cur:
                 cur.execute(query, record)
                 data = cur.fetchall()
+                print(data)
             return data
         except psycopg2.Error as error:
             return error
@@ -105,8 +93,8 @@ class Order(User):
 
             last_row = await self.get_last_order_id(user_id)
             id = last_row
-            query = "UPDATE {} SET {} = {}  WHERE {} = {};".format(f'"{column}"', f'"{where}"', f"'{equals}'", f'"id"',
-                                                                   id)
+            query = "UPDATE {} SET {} = {}  WHERE {} = {};".format(f'"{column}"', f'"{where}"',
+                                                                   f"'{equals}'", f'"id"', id)
             with con.cursor() as cur:
                 cur.execute(query)
                 con.commit()
@@ -115,10 +103,17 @@ class Order(User):
 
     async def get_last_order_id(self, user_id):
         data = await self.get_last_order(user_id)
-        print(data)
-        print(data)
         return data[0][0]
 
+    async def get_last_order_time(self, user_id):
+        data = await self.get_last_order(user_id)
+        return data[0][2]
+    async def get_last_order_addresses(self, user_id):
+        data = await self.get_last_order(user_id)
+        return data[0][2]
+    async def get_last_order_price(self, user_id):
+        data = await self.get_last_order(user_id)
+        return data[0][-1]
 
     async def get_count_rows(self):
         try:
@@ -131,7 +126,20 @@ class Order(User):
             return error
 
 
-
+async def sql_safe_insert(table_name, values_dict: dict):
+    try:
+        con = data.get_postgres()
+        safe_query = sql.SQL("INSERT INTO {} ({}) VALUES ({});").format(sql.Identifier(table_name),
+                                                                        sql.SQL(', ').join(map(sql.Identifier,
+                                                                                               values_dict)),
+                                                                        sql.SQL(", ").join(map(sql.Placeholder,
+                                                                                               values_dict)))
+        with con.cursor() as cur:
+            cur.execute(safe_query, values_dict)
+            con.commit()
+    except (psycopg2.Error, IndexError) as error:
+        print(error)
+        return False
 
 
 

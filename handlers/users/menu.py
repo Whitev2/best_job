@@ -7,7 +7,7 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-from DataBase.base import Order
+from DataBase.base import Order, User
 from filters.driver_filter import IsDriver
 from states.driver_register import driver_reg
 
@@ -16,7 +16,7 @@ router = Router()
 router.message(IsDriver())
 router.message(state=driver_reg)
 order = Order()
-
+user = User()
 @router.message(F.text == 'Мой кабинет')
 async def user_cabinet(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()
@@ -39,4 +39,11 @@ async def orders_history(message: Message, state: FSMContext):
     await message.answer(text)
 @router.message(F.text == 'Мой заработок')
 async def user_balance(message: Message, state: FSMContext):
-    await message.answer("Ваш заработок за две недели:")
+    last_order = await order.get_last_order(user_id=str(message.from_user.id))
+    user_balance = await user.get_balance(message.from_user.id)
+    print(last_order)
+    order_price = last_order[0][6]
+    print(order_price)
+
+    await message.answer(f"За последний заказ вам начислено: {order_price}р.\n"
+                         f"Ваш баланс до расчетного периода: {user_balance}р.")
