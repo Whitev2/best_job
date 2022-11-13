@@ -9,7 +9,7 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from DataBase.base import sql_safe_insert
+from DataBase.base import User
 from filters.admin_filter import IsAdmin
 from handlers.users.start import admin_menu
 from loader import all_data
@@ -19,7 +19,7 @@ router = Router()
 router.message(state=Admin_state)
 data = all_data()
 bot = data.get_bot()
-
+user = User()
 
 @router.message(F.text == 'Управление ботом')
 async def edit_bot(message: Message, state: FSMContext):
@@ -52,7 +52,7 @@ async def confirm(message: Message, state: FSMContext):
     if state_name == 'Admin_state:confirm_text':
         tag = data['user_text'][0]
         text = data['user_text'][-1]
-        await sql_safe_insert('texts', {'tag': tag, 'text': text})
+        await User.sql_safe_insert('texts', {'tag': tag, 'text': text})
         await message.answer('Текст успешно добавлен')
         await state.set_state(Admin_state.main_menu)
         await edit_text(message, state)

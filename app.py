@@ -4,6 +4,7 @@ from aiogram.client.session import aiohttp
 from aiogram.dispatcher.fsm.storage.redis import RedisStorage
 
 from DataBase.TablesCreator import tables_god
+from DataBase.base import User
 from Middleware.trottling import ThrottlingMiddleware
 from handlers.admin import admin_menu, orders
 from handlers.users import start, menu, register, get_order
@@ -19,7 +20,8 @@ dp = Dispatcher(storage)
 async def main():
     bot_info = await bot.get_me()
     print(f"Hello, i'm {bot_info.first_name} | {bot_info.username}")
-
+    user = User()
+    print(await user.get_user_info('2036190335', 'balance'))
     # Технические роутеры
 
     dp.include_router(start.router)

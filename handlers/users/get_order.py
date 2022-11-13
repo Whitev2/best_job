@@ -8,11 +8,15 @@ from aiogram.dispatcher.fsm.context import FSMContext
 from aiogram.types import Message, order_info
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
-from DataBase.base import list_read, redis_just_one_write, sql_safe_insert, sql_count_rows, sql_safe_select, \
-    data_getter, sql_get_last_rows, del_key
+from DataBase.base import list_read, redis_just_one_write, \
+    data_getter, del_key, Order, User, sql_safe_insert
 from filters.driver_filter import IsDriver
+from handlers.users.menu import user_cabinet
 from loader import all_data
+from payments.payroll import salary
+from points import one_point
 from states.driver_register import driver_reg
+from states.orders_states import Order_driver
 
 flags = {"throttling_key": "True"}
 router = Router()
@@ -20,6 +24,8 @@ router.message(IsDriver())
 data = all_data()
 bot = data.get_bot()
 
+order = Order()
+user = User()
 
 async def send_order(user_id, text):
     try:
@@ -33,22 +39,60 @@ async def send_order(user_id, text):
 
 @router.callback_query(lambda call: 'driver_confirm_order' in call.data)
 async def driver_confirm_order(query: types.CallbackQuery, state: FSMContext):
-    await redis_just_one_write("User: Status_delivery:", "1")
+    await state.set_state(Order_driver.driver_here)
+    await state.update_data(count=0)
+    await query.message.delete()
+    await redis_just_one_write(f"User: Status_delivery: {query.from_user.id}", "1")
     user_id = query.from_user.id
     order_info = await list_read(f"Orders: {user_id}: ")
-    count_rows = await sql_count_rows()
-    count_rows = count_rows[0][0]
+    count_rows = await order.get_last_order(f"{query.from_user.id}")
+    print(count_rows)
+    if len(count_rows) != 0:
+        count_rows = count_rows[0][0]
+    else:
+        count_rows = 0
     jsonorder = json.dumps(order_info)
+
     await sql_safe_insert('orders', {"id": count_rows + 1, "Executor_id": str(query.from_user.id),
                                      "DateTime_order": datetime.utcnow(), "extradition": jsonorder, "status": False,
-                                     })
-    r = await sql_get_last_rows(str(user_id))
+                                     "order_time": None, 'price': 0.0})
     await del_key(f"Orders: {user_id}: ")
-    print(r)
-
-    await query.message.answer('Вы подтвердили заказ')
+    nmarkup = ReplyKeyboardBuilder()
+    nmarkup.row(types.KeyboardButton(text="Я приехал"))
+    await query.message.answer(f'Вы подтвердили заказ, нажмите <b>Я приехал</b> по приезде.'
+                               f' \n\nВаша первая точка: {one_point}',
+                               reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 @router.callback_query(lambda call: 'driver_cancel_order' in call.data)
 async def driver_cancel_order(query: types.CallbackQuery, state: FSMContext):
     await query.message.answer('Вы отказылись от заказа')
+
+
+@router.message(F.text == 'Я приехал', state=Order_driver.driver_here)
+async def driver_here(message: Message, state: FSMContext):
+    data = await state.get_data()
+    count = data.get("count")
+
+    driver_order = await order.get_last_order(str(message.from_user.id))
+    time_start = driver_order[0][1]
+    time_start = datetime.strptime(time_start, "%Y-%m-%d %H:%M:%S.%f")
+    print(driver_order)
+    if len(driver_order[0][3]) > count:
+        address = driver_order[0][3][count]
+        await message.answer(f"Отлично! Ваш следующий адрес: {address}")
+        await state.update_data(count=count + 1)
+    else:
+        user_balance = await user.get_balance(message.from_user.id)
+        await redis_just_one_write(f"User: Status_delivery: {message.from_user.id}", "0")
+        order_price = await salary(len(driver_order[0][3]))
+        print(user_balance)
+        print(order_price)
+        new_user_balance = float(user_balance) + float(order_price)
+        date_end = datetime.now() - time_start
+        await user.sql_update('users', {'balance': new_user_balance}, {'user_id': message.from_user.id})
+        await order.sql_update_orders('orders', str(message.from_user.id), {'order_time': f'{date_end}'})
+        await order.sql_update_orders('orders', str(message.from_user.id), {'price': f'{order_price}'})
+        await message.answer("Маршрут завершен, оплату за заказ вы можете посмотреть в своём кабинете.")
+        await state.set_state(driver_reg.main)
+        await user_cabinet(message, state)
 
