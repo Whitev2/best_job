@@ -76,8 +76,10 @@ async def driver_here(message: Message, state: FSMContext):
     time_start = driver_order[0][1]
     time_start = datetime.strptime(time_start, "%Y-%m-%d %H:%M:%S.%f")
     if len(driver_order[0][3]) > count:
-        address = driver_order[0][3][count]
-        await message.answer(f"Отлично! Ваш следующий адрес: {address}")
+        address = driver_order[0][3][count].split('//')
+        await message.answer(f"Отлично! \n\nВаш следующий адрес: {address[0]}\n"
+                             f"Артикуль: {address[1]}\n"
+                             f"Число коробок: {address[2]}")
         await state.update_data(count=count + 1)
     else:
         user_balance = await user.get_balance(message.from_user.id)
