@@ -22,7 +22,7 @@ async def name(message: Message, state: FSMContext):
     name = message.text
     await state.update_data(name=name)
     await state.set_state(driver_reg.car_number)
-    await message.answer('Теперь напишите номер своего автомобиля в формате "A111AA11')
+    await message.answer('Теперь напишите номер своего автомобиля в формате "A777AA777"')
 
 @router.message(state=driver_reg.car_number)
 async def name(message: Message, state: FSMContext):
