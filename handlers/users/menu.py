@@ -42,7 +42,7 @@ async def user_balance(message: Message, state: FSMContext):
     last_order = await order.get_last_order(user_id=str(message.from_user.id))
     user_balance = await user.get_balance(message.from_user.id)
     print(last_order)
-    order_price = last_order[0][6]
+    order_price = last_order[0][4]
     print(order_price)
 
     await message.answer(f"За последний заказ вам начислено: {order_price}р.\n"
