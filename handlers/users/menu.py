@@ -44,12 +44,7 @@ async def user_balance(message: Message, state: FSMContext):
     try:
         order_price = last_order[0][6]
     except:
-        pass
-
-    if order_price:
-        pass
-    else:
         order_price = 0
 
-    await message.answer(f"За последний заказ вам начислено: {order_price}р.\n"
+    await message.answer(f"За последний заказ вам начислено: {float(order_price)}р.\n"
                          f"Ваш баланс до расчетного периода: {user_balance}р.")
