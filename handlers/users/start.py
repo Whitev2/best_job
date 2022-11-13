@@ -24,7 +24,7 @@ async def admin_menu(message: types.Message, state: FSMContext):
     await message.answer('Добро пожадовать в админ меню.', reply_markup=main_admin_keyboard())
 
 @router.message(IsDriver(), commands=['start'], flags=flags)
-async def admin_menu(message: types.Message, state: FSMContext):
+async def client_menu(message: types.Message, state: FSMContext):
     print(1)
     user_info = await user.get_user_info(str(message.from_user.id), 'user_id')
     print(user_info)

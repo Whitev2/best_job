@@ -23,6 +23,10 @@ router.message(state=(Admin_state, Order_state))
 data = all_data()
 bot = data.get_bot()
 
+
+@router.message(F.text == 'Возврат в меню')
+async def exit(message: Message, state: FSMContext):
+    await admin_menu(message, state)
 @router.message(F.text == 'Заказы')
 async def orders(message: Message, state: FSMContext):
     nmarkup = ReplyKeyboardBuilder()

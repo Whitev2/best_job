@@ -8,6 +8,5 @@ def main_admin_keyboard():
     nmarkup.row(types.KeyboardButton(text="Аналитика"))
     nmarkup.row(types.KeyboardButton(text="Управление ботом"))
 
-    nmarkup.adjust(2)
-    nmarkup.row(types.KeyboardButton(text="Выйти"))
+    nmarkup.adjust(1, 1)
     return nmarkup.as_markup(resize_keyboard=True)

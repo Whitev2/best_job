@@ -43,8 +43,8 @@ async def name(message: Message, state: FSMContext):
         car_mass = message.text
         print(data)
         print(car_mass)
-        await sql_safe_insert('users', {'user_id': message.from_user.id, 'username': data['name'],
-                                        'DateTime_come': datetime.now(), 'balance': float(0), 'car_number': data['number_car'],
+        await sql_safe_insert('users', {'user_id': message.from_user.id, 'username': data['name'].lower(),
+                                        'DateTime_come': datetime.now(), 'balance': float(0), 'car_number': data['number_car'].lower(),
                                         'car_mass': car_mass[:-1]})
         nmarkup = ReplyKeyboardBuilder()
         nmarkup.row(types.KeyboardButton(text="Мой кабинет"))
