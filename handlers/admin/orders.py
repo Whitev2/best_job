@@ -127,7 +127,7 @@ async def address(message: types.Message, state: FSMContext):
         nmarkup.button(text='Создать заказ', callback_data=f'{user_id}|confirm_order')
         text = data.get("text")
         text = text + "\n\n__________________\n" + f"Точка: {last_count}\n" + f"Адрес: {address[0]}\n" \
-                                                                              f"Артикуль: {address[1]}"\
+                                                                              f"Артикуль: {address[1]}\n"\
                                                                               f"Кол-во коробок: {address[2]}\n"
 
 
