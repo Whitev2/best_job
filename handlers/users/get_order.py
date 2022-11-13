@@ -46,7 +46,6 @@ async def driver_confirm_order(query: types.CallbackQuery, state: FSMContext):
     user_id = query.from_user.id
     order_info = await list_read(f"Orders: {user_id}: ")
     count_rows = await order.get_last_order(f"{query.from_user.id}")
-    print(count_rows)
     if len(count_rows) != 0:
         count_rows = count_rows[0][0]
     else:
@@ -76,7 +75,6 @@ async def driver_here(message: Message, state: FSMContext):
     driver_order = await order.get_last_order(str(message.from_user.id))
     time_start = driver_order[0][1]
     time_start = datetime.strptime(time_start, "%Y-%m-%d %H:%M:%S.%f")
-    print(driver_order)
     if len(driver_order[0][3]) > count:
         address = driver_order[0][3][count]
         await message.answer(f"Отлично! Ваш следующий адрес: {address}")
@@ -85,10 +83,17 @@ async def driver_here(message: Message, state: FSMContext):
         user_balance = await user.get_balance(message.from_user.id)
         await redis_just_one_write(f"User: Status_delivery: {message.from_user.id}", "0")
         order_price = await salary(len(driver_order[0][3]))
-        print(user_balance)
-        print(order_price)
         new_user_balance = float(user_balance) + float(order_price)
         date_end = datetime.now() - time_start
+        bata = all_data()
+        user_info = await user.get_user({'user_id': message.from_user.id})
+        try:
+            await bot.send_message(chat_id=bata.info_channel, text=f"Водитель: {user_info[0][1].upper()}\n"
+                                                               f"Номер авто: {user_info[0][3].upper()}\n\n"
+                                                                   f"<b>Завершил заказ: ID-{driver_order[0][0]}</b>\n"
+                                                                   )
+        except Exception:
+            pass
         await user.sql_update('users', {'balance': new_user_balance}, {'user_id': message.from_user.id})
         await order.sql_update_orders('orders', str(message.from_user.id), {'order_time': f'{date_end}'})
         await order.sql_update_orders('orders', str(message.from_user.id), {'price': f'{order_price}'})

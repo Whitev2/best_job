@@ -14,6 +14,7 @@ class all_data:
         self.pg_host = os.getenv('POSTGRES_HOST')
         self.pg_port = os.getenv('POSTGRES_PORT')
         self.driver_group = "-1001710496222"
+        self.info_channel = "-1001810427568"
         self.super_admins = (2036190335, 2133981686)
 
 # функции для подключения к базам и токен

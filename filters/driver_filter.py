@@ -14,13 +14,10 @@ class IsDriver(BaseFilter):
     async def __call__(self, message: Message) -> bool:
         try:
             status = await redis_just_one_read(f"User: Status_delivery: {message.from_user.id}")
-            print(111)
             try:
                 user_channel_status = await bot.get_chat_member(chat_id=data.driver_group, user_id=message.from_user.id)
             except Exception as e:
                 print(e)
-            print(status)
-            print(user_channel_status)
             if user_channel_status.status != 'left':
                 if status is None:
                     return True

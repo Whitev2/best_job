@@ -44,7 +44,6 @@ async def orders(message: Message, state: FSMContext):
         for driver in request:
             nmarkup = InlineKeyboardBuilder()
             nmarkup.button(text='Создать заказ', callback_data=f'{driver[0]}|new_order')
-            print(driver)
             await message.answer(f'Водитель: {driver[1]}\nНомер автомобиля: {driver[-2]}', reply_markup=nmarkup.as_markup())
     else:
         await message.answer('Увы, водителей нет')
@@ -59,7 +58,6 @@ async def orders(message: Message, state: FSMContext):
             if status != '1':
                 nmarkup = InlineKeyboardBuilder()
                 nmarkup.button(text='Создать заказ', callback_data=f'{driver[0]}|new_order')
-                print(driver)
                 await message.answer(f'Водитель: {driver[1]}\nНомер автомобиля: {driver[-3]}', reply_markup=nmarkup.as_markup())
     else:
         await message.answer('Увы, водителей нет')

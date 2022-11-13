@@ -89,7 +89,6 @@ class Order():
             with con.cursor() as cur:
                 cur.execute(query, record)
                 data = cur.fetchall()
-                print(data)
             return data
         except psycopg2.Error as error:
             return error
