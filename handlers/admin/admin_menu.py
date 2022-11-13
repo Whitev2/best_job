@@ -84,6 +84,14 @@ async def driver_info(message: Message, state: FSMContext):
     else:
         await message.answer("По данному запросу водитель не найден")
 
+@router.callback_query(lambda call: 'driver_del' in call.data)
+async def driver_calc(query: types.CallbackQuery, state: FSMContext):
+    data = query.data.split('|')
+    driver_id = data[-1]
+    await user.sql_delete('users', {'user_id': driver_id})
+    await query.message.answer('Вы успешно удалили водителя из базы')
+    await edit_bot(query.message, state)
+
 @router.callback_query(lambda call: 'driver_calc' in call.data)
 async def driver_calc(query: types.CallbackQuery, state: FSMContext):
     data = query.data.split('|')
