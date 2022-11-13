@@ -107,7 +107,7 @@ async def add_stop(query: types.CallbackQuery, state: FSMContext):
     router_message = await query.message.answer("Пожалуйста, введите адрес точки разгрузки,"
                                                 " колличество коробок и артикуль\n\n"
                                                 "<b>Формат вводимых данных:</b>\n"
-                                                "Г. Москва, ул. Большая серпуховская 32//ЧИСЛО_КОРОБОК//АРТИКУЛь"
+                                                "Г. Москва, ул. Большая серпуховская 32//АРТИКУЛЬ//ЧИСЛО_КОРОБОК"
                                                 '\n\n❕ Используйте "//" для разделения текста')
     await state.update_data(router_message_id=router_message.message_id)
 
@@ -127,8 +127,9 @@ async def address(message: types.Message, state: FSMContext):
         nmarkup.button(text='Создать заказ', callback_data=f'{user_id}|confirm_order')
         text = data.get("text")
         text = text + "\n\n__________________\n" + f"Точка: {last_count}\n" + f"Адрес: {address[0]}\n" \
-                                                                              f"Кол-во коробок: {address[1]}\n" \
-                                                                              f"Артикуль: {address[2]}"
+                                                                              f"Артикуль: {address[1]}"\
+                                                                              f"Кол-во коробок: {address[2]}\n"
+
 
         await state.update_data(user_id=user_id)
         await state.update_data(text=text)
