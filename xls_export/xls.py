@@ -42,6 +42,6 @@ async def export_to_xls():
             orders_xls.write(f'F{count}', str(order[3]).replace('//', ','))
             count += 1
         workbook.close()
+        return True
     except Exception as e:
         print(e)
-# сохраняем и закрываем

@@ -21,6 +21,15 @@ class User:
             data = cur.fetchall()
             return data
 
+    async def get_user(self, condition_dict):
+        where = list(condition_dict.keys())[0]
+        point = condition_dict[where]
+        con = self.data.get_postgres()
+        sql_query = "SELECT * FROM users WHERE {} = {}".format(f'"{where}"', f"'{point}'")
+        with con.cursor() as cur:
+            cur.execute(sql_query)
+            data = cur.fetchall()
+            return data
 
     async def sql_delete(self, table_name, condition_dict):
         try:
