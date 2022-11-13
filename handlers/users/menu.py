@@ -51,7 +51,6 @@ async def name(message: Message, state: FSMContext):
 @router.message(F.text == 'История заказов')
 async def orders_history(message: Message, state: FSMContext):
     last_orders = await order.get_last_order(user_id=str(message.from_user.id), limit=10)
-    print(last_orders)
     text = f"Последние {len(last_orders)} заказов:\n\n"
     for orders in last_orders:
         datestr = orders[1]

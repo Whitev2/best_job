@@ -41,8 +41,7 @@ async def name(message: Message, state: FSMContext):
     if message.text in ['2.5Т', '5Т', '10Т']:
         data = await state.get_data()
         car_mass = message.text
-        print(data)
-        print(car_mass)
+
         await sql_safe_insert('users', {'user_id': message.from_user.id, 'username': data['name'].lower(),
                                         'DateTime_come': datetime.now(), 'balance': float(0), 'car_number': data['number_car'].lower(),
                                         'car_mass': car_mass[:-1]})
