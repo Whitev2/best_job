@@ -82,7 +82,7 @@ async def driver_here(message: Message, state: FSMContext):
     else:
         user_balance = await user.get_balance(message.from_user.id)
         await redis_just_one_write(f"User: Status_delivery: {message.from_user.id}", "0")
-        order_price = await salary(len(driver_order[0][3]))
+        order_price = await salary(message.from_user.id, len(driver_order[0][3]))
         print(user_balance)
         print(order_price)
         new_user_balance = float(user_balance) + float(order_price)
