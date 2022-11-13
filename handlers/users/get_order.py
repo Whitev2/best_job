@@ -83,6 +83,8 @@ async def driver_here(message: Message, state: FSMContext):
         user_balance = await user.get_balance(message.from_user.id)
         await redis_just_one_write(f"User: Status_delivery: {message.from_user.id}", "0")
         order_price = await salary(len(driver_order[0][3]))
+        print(user_balance)
+        print(order_price)
         new_user_balance = float(user_balance) + float(order_price)
         date_end = datetime.now() - time_start
         bata = all_data()
@@ -94,6 +96,7 @@ async def driver_here(message: Message, state: FSMContext):
                                                                    )
         except Exception:
             pass
+        print(new_user_balance)
         await user.sql_update('users', {'balance': new_user_balance}, {'user_id': message.from_user.id})
         await order.sql_update_orders('orders', str(message.from_user.id), {'order_time': f'{date_end}'})
         await order.sql_update_orders('orders', str(message.from_user.id), {'price': f'{order_price}'})
