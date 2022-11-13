@@ -25,7 +25,9 @@ async def admin_menu(message: types.Message, state: FSMContext):
 
 @router.message(IsDriver(), commands=['start'], flags=flags)
 async def admin_menu(message: types.Message, state: FSMContext):
-    user_info = await user.get_user_info(str(message.from_user.id))
+    print(1)
+    user_info = await user.get_user_info(str(message.from_user.id), 'user_id')
+    print(user_info)
     if not user_info:
         await state.set_state(driver_reg.name)
         await message.answer('Добро пожадовать, пожалуйста, напишите ваше ФИО.')

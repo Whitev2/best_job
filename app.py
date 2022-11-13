@@ -9,7 +9,7 @@ from Middleware.trottling import ThrottlingMiddleware
 from handlers.admin import admin_menu, orders
 from handlers.users import start, menu, register, get_order
 from loader import all_data
-
+from xls_export.xls import export_to_xls
 
 data = all_data()
 bot = data.get_bot()
@@ -23,6 +23,7 @@ async def main():
     user = User()
     print(await user.get_user_info('2036190335', 'balance'))
     # Технические роутеры
+    await export_to_xls()
 
     dp.include_router(start.router)
     dp.include_router(admin_menu.router)
