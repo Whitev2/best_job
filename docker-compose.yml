@@ -35,3 +35,4 @@ services:
       - "1440:1440"
     env_file:
       - .env
+    restart: always

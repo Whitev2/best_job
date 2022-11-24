@@ -4,8 +4,10 @@ from datetime import datetime
 
 from aiogram import Router, F, Bot
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove, InputFile, FSInputFile
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
@@ -17,7 +19,7 @@ from states.admin_states import Admin_state
 from xls_export.xls import export_to_xls
 
 router = Router()
-router.message(state=Admin_state)
+router.message(StateFilter(Admin_state))
 data = all_data()
 bot = data.get_bot()
 user = User()
@@ -68,7 +70,7 @@ async def driver_manage(message: Message, state: FSMContext):
     await message.answer("Напишите фио или номер автомобиля водителя",
                          reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(state=Admin_state.driver_edit)
+@router.message(StateFilter(Admin_state.driver_edit))
 async def driver_info(message: Message, state: FSMContext):
     user_info = await user.get_user({'car_number': message.text.lower()})
     if len(user_info) == 0:
@@ -107,12 +109,12 @@ async def driver_calc(query: types.CallbackQuery, state: FSMContext):
 
 """********************************************* NEW TEXT **********************************************************"""
 
-@router.message(F.text == 'Выйти', state=Admin_state.confirm_text)
+@router.message(F.text == 'Выйти', StateFilter(Admin_state.confirm_text))
 async def confirm(message: Message, state: FSMContext):
     await state.clear()
     await admin_menu(message, state)
 
-@router.message(F.text == 'Подтвердить', state=Admin_state.confirm_text)
+@router.message(F.text == 'Подтвердить', StateFilter(Admin_state.confirm_text))
 async def confirm(message: Message, state: FSMContext):
     data = await state.get_data()
     state_name = await state.get_state()
@@ -125,7 +127,7 @@ async def confirm(message: Message, state: FSMContext):
         await edit_text(message, state)
 
 
-@router.message(F.text == 'Отменить', state=Admin_state.confirm_text)
+@router.message(F.text == 'Отменить', StateFilter(Admin_state.confirm_text))
 async def confirm(message: Message, state: FSMContext):
     state_name = await state.get_state()
     if state_name == 'Admin_state:confirm_text':
@@ -142,7 +144,7 @@ async def add_text(message: Message, state: FSMContext):
     await message.answer('Пожалуйста напишите текст в формате: TAG|TEXT\n\nДопускается HTML-разметка', reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
 
-@router.message(state=Admin_state.confirm_text)
+@router.message(StateFilter(Admin_state.confirm_text))
 async def confirm_text(message: Message, state: FSMContext):
     user_text = message.html_text.split(sep='|')
     await state.update_data(user_text=user_text)

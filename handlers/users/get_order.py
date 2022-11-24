@@ -4,7 +4,8 @@ from datetime import datetime
 
 from aiogram import Router, F
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, order_info
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
@@ -67,7 +68,7 @@ async def driver_cancel_order(query: types.CallbackQuery, state: FSMContext):
     await query.message.answer('Вы отказылись от заказа')
 
 
-@router.message(F.text == 'Я приехал', state=Order_driver.driver_here)
+@router.message(F.text == 'Я приехал', StateFilter(Order_driver.driver_here))
 async def driver_here(message: Message, state: FSMContext):
     data = await state.get_data()
     count = data.get("count")
