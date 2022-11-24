@@ -4,8 +4,10 @@ from datetime import datetime
 
 from aiogram import Router, F, Bot
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
@@ -19,7 +21,7 @@ from states.admin_states import Admin_state
 from states.orders_states import Order_state
 
 router = Router()
-router.message(state=(Admin_state, Order_state))
+router.message(StateFilter(Admin_state, Order_state))
 data = all_data()
 bot = data.get_bot()
 
@@ -98,7 +100,7 @@ async def new_order(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Order_state.add_stop)
 
 
-@router.callback_query(lambda call: 'add_stop' in call.data, state=Order_state.add_stop)
+@router.callback_query(lambda call: 'add_stop' in call.data, StateFilter(Order_state.add_stop))
 async def add_stop(query: types.CallbackQuery, state: FSMContext):
     await state.set_state(Order_state.address)
     data = await state.get_data()
@@ -112,7 +114,7 @@ async def add_stop(query: types.CallbackQuery, state: FSMContext):
     await state.update_data(router_message_id=router_message.message_id)
 
 
-@router.message(state=Order_state.address)
+@router.message(StateFilter(Order_state.address))
 async def address(message: types.Message, state: FSMContext):
     address = message.html_text.split("//")
     if len(address) == 3:
@@ -140,7 +142,7 @@ async def address(message: types.Message, state: FSMContext):
         await message.answer('Проверьте введеные данные и повторите попытку'
                              '\n\n❕ Используйте "//" для разделения текста')
 
-@router.callback_query(lambda call: 'confirm_order' in call.data, state=Order_state.add_stop)
+@router.callback_query(lambda call: 'confirm_order' in call.data, StateFilter(Order_state.add_stop))
 async def add_stop(query: types.CallbackQuery, state: FSMContext):
     await query.message.delete()
     query_data = query.data.split('|')

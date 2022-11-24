@@ -2,7 +2,8 @@ import asyncio
 
 from aiogram import Router
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.filters import StateFilter, Command
+from aiogram.fsm.context import FSMContext
 
 from DataBase.base import User
 from filters.admin_filter import IsAdmin
@@ -14,15 +15,15 @@ from states.driver_register import driver_reg
 
 flags = {"throttling_key": "True"}
 router = Router()
-router.message(state="*")
+router.message(StateFilter("*"))
 user = User()
-@router.message(IsAdmin(), commands=['admin'], state="*")
+@router.message(IsAdmin(), Command('admin'))
 async def admin_menu(message: types.Message, state: FSMContext):
     await state.clear()
     await state.set_state(Admin_state.main_menu)
     await message.answer('Добро пожадовать в админ меню.', reply_markup=main_admin_keyboard())
 
-@router.message(IsDriver(), commands=['start'], flags=flags)
+@router.message(IsDriver(), Command('start'), flags=flags)
 async def client_menu(message: types.Message, state: FSMContext):
     user_info = await user.get_user_info(str(message.from_user.id), 'user_id')
     if not user_info:

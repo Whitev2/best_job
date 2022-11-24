@@ -3,7 +3,8 @@ from datetime import datetime
 
 from aiogram import Router
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -15,16 +16,16 @@ from states.driver_register import driver_reg
 flags = {"throttling_key": "True"}
 router = Router()
 router.message(IsDriver())
-router.message(state=driver_reg)
+router.message(StateFilter(driver_reg))
 user = User
-@router.message(state=driver_reg.name)
+@router.message(StateFilter(driver_reg.name))
 async def name(message: Message, state: FSMContext):
     name = message.text
     await state.update_data(name=name)
     await state.set_state(driver_reg.car_number)
     await message.answer('Теперь напишите номер своего автомобиля в формате "A777AA777"')
 
-@router.message(state=driver_reg.car_number)
+@router.message(StateFilter(driver_reg.car_number))
 async def name(message: Message, state: FSMContext):
     number_car = message.text
     await state.update_data(number_car=number_car)
@@ -36,7 +37,7 @@ async def name(message: Message, state: FSMContext):
     await message.answer("Выберите вместимость вашего автомобиля, или укажите приближенный из доступных",
                          reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(state=driver_reg.car_mass)
+@router.message(StateFilter(driver_reg.car_mass))
 async def name(message: Message, state: FSMContext):
     if message.text in ['2.5Т', '5Т', '10Т']:
         data = await state.get_data()

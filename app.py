@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import Dispatcher
 from aiogram.client.session import aiohttp
-from aiogram.dispatcher.fsm.storage.redis import RedisStorage
+from aiogram.fsm.storage.redis import RedisStorage
 
 from DataBase.TablesCreator import tables_god
 from DataBase.base import User
@@ -14,7 +14,7 @@ from xls_export.xls import export_to_xls
 data = all_data()
 bot = data.get_bot()
 storage = RedisStorage.from_url(data.redis_url)
-dp = Dispatcher(storage)
+dp = Dispatcher(storage=storage)
 
 
 async def main():

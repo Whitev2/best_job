@@ -3,7 +3,8 @@ from datetime import datetime
 
 from aiogram import Router, F
 from aiogram import types
-from aiogram.dispatcher.fsm.context import FSMContext
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
@@ -14,9 +15,10 @@ from states.driver_register import driver_reg
 flags = {"throttling_key": "True"}
 router = Router()
 router.message(IsDriver())
-router.message(state=driver_reg)
+router.message(StateFilter(driver_reg))
 order = Order()
 user = User()
+
 @router.message(F.text == 'Мой кабинет')
 async def user_cabinet(message: Message, state: FSMContext):
     await state.clear()
@@ -40,7 +42,7 @@ async def change_car_num(message: Message, state: FSMContext):
     await message.answer('напишите номер своего автомобиля в формате "A777AA777"',
                          reply_markup=nmarkup.as_markup(resize_keyboard=True))
 
-@router.message(state=driver_reg.car_number_edit)
+@router.message(StateFilter(driver_reg.car_number_edit))
 async def name(message: Message, state: FSMContext):
     number_car = message.text
     await user.sql_update('users', {'car_number': message.text.lower()}, {'user_id': message.from_user.id})
